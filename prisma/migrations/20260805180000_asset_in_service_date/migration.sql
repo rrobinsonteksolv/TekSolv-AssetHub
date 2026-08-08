@@ -1,0 +1,22 @@
+-- ============================================================================
+-- Assets get a "date placed in service" — the third of three distinct dates.
+--
+--   purchaseDate     when TekSolv bought it        (billing, depreciation)
+--   manufactureDate  when it was made              (service life / retirement)
+--   inServiceDate    when it first went to work    (inspection intervals)
+--
+-- These genuinely differ and conflating any two loses real information: gear
+-- can sit in stores for a year between purchase and first use, and a harness
+-- made in 2019, bought in 2023, and issued in 2024 has three different answers
+-- to three different questions. Form FP-01 asks for manufacture *and*
+-- in-service side by side, which is the clearest statement that they are not
+-- the same field.
+--
+-- **Not a NetSuite field**, like manufactureDate. FAM does not carry it, so it
+-- is entered in AssetHub and stays there: the sync writes an explicit
+-- allow-list of NetSuite-owned columns (`owned` in src/lib/netsuite/sync.ts)
+-- and anything absent from that object is untouched by construction.
+-- `verify-asset-dates` asserts that rather than trusting it.
+-- ============================================================================
+
+ALTER TABLE "Asset" ADD COLUMN IF NOT EXISTS "inServiceDate" TIMESTAMP(3);
